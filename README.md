@@ -4,7 +4,7 @@
 - Docker
 - Docker Compose
 - Python 3.8+
-- PostgreSQL (if using database)
+- PostgreSQL
 
 ## Setup Instructions
 
@@ -42,3 +42,7 @@
 - Stop containers: `docker-compose down`
 - View logs: `docker-compose logs -f`
 - Run management commands: `docker-compose exec web python manage.py <command>`
+
+## Backup and Restore
+- To backup: `docker exec -t your_db_container pg_dumpall -c -U your_db_user > backup.sql`
+- To restore: `cat backup.sql | docker exec -i your_db_container psql -U your_db_user`
