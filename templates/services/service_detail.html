@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ service.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-3">{{ service.title }}</h1>
+
+        {% if service.image %}
+        <img src="{{ service.image.url }}"
+             alt="{{ service.title }}"
+             class="img-fluid rounded mb-4 shadow-sm"
+             style="max-height: 400px; width: 100%; object-fit: cover;">
+        {% endif %}
+
+        <p class="lead mb-4">{{ service.intro }}</p>
+
+        <div class="content-body">
+            {{ service.content|safe }}
+        </div>
+
+        <a href="{% url 'services:list' %}" class="btn btn-outline-secondary mt-4">&larr; Back to Services</a>
+    </div>
+</div>
+{% endblock %}

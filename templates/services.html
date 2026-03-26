@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block title %}{% page_attribute "page_title" %} — Los Reyes Properties{% endblock %}
+
+{% block content %}
+<div id="wrapper">
+  <section class="page-title">
+    <div class="container">
+      <div class="page-title-row">
+        <div class="page-title-content">
+          <h1>{% page_attribute "page_title" %}</h1>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="container">
+    {% placeholder "services_intro" %}
+    {% placeholder "services_list" %}
+  </div>
+</div>
+{% endblock %}

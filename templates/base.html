@@ -1,0 +1,116 @@
+{% load cms_tags menu_tags sekizai_tags static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Los Reyes Properties{% endblock %}</title>
+  <link rel="icon" href="{% static 'favicon.ico' %}" />
+
+  <!-- Vendor styles (local) -->
+  <link rel="stylesheet" href="{% static 'vendor/css/plugins.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/css/custom.css' %}">
+
+  <!-- CDN styles -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+  <!-- Site styles (override vendor last) -->
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+
+  {% render_block "css" %}
+</head>
+<body>
+
+  {% cms_toolbar %}
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <header id="header" data-fullwidth="true" class="dark submenu-dark header-disable-fixed">
+    <div class="header-inner">
+      <div class="container">
+
+        <!-- Logo -->
+        <div id="logo">
+          <a href="/">
+            <span class="logo-default"><img style="max-height:85px;" src="{% static 'vendor/images/LOGO-WERCR-Oficiales-bla-ro.png' %}" alt="Los Reyes Properties"></span>
+            <span class="logo-dark"><img style="max-height:85px;" src="{% static 'vendor/images/LOGO-WERCR-Oficiales-bla-ro.png' %}" alt="Los Reyes Properties"></span>
+          </a>
+        </div>
+
+        <!-- Header extras -->
+        <div class="header-extras"><ul></ul></div>
+
+        <!-- Mobile trigger -->
+        <div id="mainMenu-trigger">
+          <a class="lines-button x"><span class="lines"></span></a>
+        </div>
+
+        <!-- Navigation — CMS-managed pages + static links -->
+        <div id="mainMenu">
+          <div class="container">
+            <nav>
+              {% block navigation %}
+              <ul>
+                {% show_menu 0 1 0 1 "cms/nav/menu.html" %}
+              </ul>
+              {% endblock navigation %}
+            </nav>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+  <!-- ── /Header ──────────────────────────────────────────── -->
+
+  <!-- ── Page content ─────────────────────────────────────── -->
+  {% block content %}{% endblock %}
+  <!-- ── /Page content ────────────────────────────────────── -->
+
+  <!-- ── Footer ───────────────────────────────────────────── -->
+  <footer id="footer" class="inverted">
+    <div class="footer-content">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-5 text-center">
+            <a href="/"><img src="{% static 'vendor/images/logo.png' %}" alt="WERCR"></a>
+          </div>
+          <div class="col-lg-7 text-center">
+            <div class="text-center social-icons social-icons-medium social-icons-border social-icons-colored-hover">
+              <ul>
+                <li class="social-facebook"><a href="https://www.facebook.com/WERCRrealestate"><i class="fab fa-facebook-f"></i></a></li>
+                <li class="social-facebook m-l-15"><a href="https://www.instagram.com/wearecostaricarealestate/"><i class="fab fa-instagram"></i></a></li>
+                <li class="social-twitter m-l-15"><a href="https://wa.link/528dyd"><i class="fab fa-whatsapp"></i></a></li>
+                <li class="social-twitter m-l-15"><a href="https://www.tiktok.com/@wercr1"><i class="fab fa-tiktok"></i></a></li>
+                <li class="social-youtube m-l-15"><a href="https://www.youtube.com/@wercrrealestaterentals4211/videos"><i class="fab fa-youtube"></i></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="copyright-content">
+      <div class="container">
+        <div class="copyright-text text-center">
+          &copy; {% now "Y" %} WERCR. All Rights Reserved.
+          <a href="/privacy-policy/">Privacy Policy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- ── /Footer ──────────────────────────────────────────── -->
+
+  <!-- Vendor scripts (local) -->
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+  <script src="{% static 'vendor/js/plugins.js' %}"></script>
+  <script src="{% static 'vendor/js/functions.js' %}"></script>
+
+  {% render_block "js" %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
