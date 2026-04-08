@@ -1,0 +1,123 @@
+{% extends "admin/change_form.html" %}
+{% load i18n static %}
+
+{% comment %}
+   Tabbed admin layout for Property change form.
+
+   Tab 1 — "Details": language tabs + all fieldsets (general, classification, specs, …)
+   Tab 2 — "Images":  the PropertyImage sortable inline
+
+   We set change_form_template on PropertyAdmin so this template is loaded
+   directly (bypassing parler's wrapper).  Language tabs are included
+   manually inside the Details tab panel below.
+{% endcomment %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  /* ── Tab bar ─────────────────────────────────────────── */
+  .prop-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #417690;
+    margin: 0 0 16px 0;
+    padding: 0;
+    list-style: none;
+  }
+  .prop-tabs li {
+    margin: 0;
+  }
+  .prop-tabs a {
+    display: block;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #666;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    margin-bottom: -2px;
+    transition: background .15s, color .15s;
+  }
+  .prop-tabs a:hover {
+    background: #e8f0fe;
+    color: #417690;
+  }
+  .prop-tabs a.active {
+    background: #fff;
+    color: #417690;
+    border-color: #417690;
+    border-bottom: 2px solid #fff;
+  }
+
+  /* ── Tab panels ──────────────────────────────────────── */
+  .prop-tab-panel {
+    display: none;
+  }
+  .prop-tab-panel.active {
+    display: block;
+  }
+</style>
+{% endblock %}
+
+{% block field_sets %}
+{# ── Tab navigation ─────────────────────────────────────── #}
+<ul class="prop-tabs" id="prop-tabs">
+  <li><a href="#" data-tab="details" class="active">Details</a></li>
+  <li><a href="#" data-tab="images">Images</a></li>
+</ul>
+
+{# ── Details tab panel ──────────────────────────────────── #}
+<div class="prop-tab-panel active" id="tab-details" data-tab-panel="details">
+  {% if language_tabs %}{% include "admin/parler/language_tabs.html" %}{% endif %}
+  {{ block.super }}
+</div>
+{% endblock %}
+
+{% block inline_field_sets %}
+{# ── Images tab panel ───────────────────────────────────── #}
+<div class="prop-tab-panel" id="tab-images" data-tab-panel="images">
+  {{ block.super }}
+</div>
+{% endblock %}
+
+{% block after_related_objects %}
+{{ block.super }}
+<script>
+(function() {
+  var tabs = document.querySelectorAll('#prop-tabs a[data-tab]');
+  var panels = document.querySelectorAll('.prop-tab-panel[data-tab-panel]');
+
+  function switchTab(tabName) {
+    tabs.forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-tab') === tabName);
+    });
+    panels.forEach(function(p) {
+      p.classList.toggle('active', p.getAttribute('data-tab-panel') === tabName);
+    });
+    // Remember active tab in sessionStorage
+    try { sessionStorage.setItem('prop-active-tab', tabName); } catch(e) {}
+  }
+
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      switchTab(this.getAttribute('data-tab'));
+    });
+  });
+
+  // Restore last active tab
+  try {
+    var saved = sessionStorage.getItem('prop-active-tab');
+    if (saved) switchTab(saved);
+  } catch(e) {}
+
+  // If there are errors in the inline (images tab), auto-switch to it
+  var imagesPanel = document.getElementById('tab-images');
+  if (imagesPanel && imagesPanel.querySelector('.errorlist')) {
+    switchTab('images');
+  }
+})();
+</script>
+{% endblock %}

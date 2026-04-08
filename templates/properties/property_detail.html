@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{{ property.title }} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<section id="page-title" class="page-title-center">
+  <div class="container">
+    <div class="page-title">
+      <h1>{{ property.title }}</h1>
+      {% if property.location %}
+      <span class="text-muted">{{ property.location }}</span>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section id="page-content">
+  <div class="container">
+    <div class="row">
+
+      {# ── Gallery column ─────────────────────────────────── #}
+      <div class="col-lg-8 mb-4">
+
+        {% with images=property.images.all %}
+        {% if images %}
+        {# Main image #}
+        {% with first=images.0 %}
+        <div class="mb-3">
+          <img id="gallery-main"
+               src="{{ first.image.url }}"
+               alt="{{ first.alt_text|default:property.title }}"
+               style="width:100%;max-height:500px;object-fit:cover;border-radius:var(--radius-md,8px);" />
+        </div>
+        {% endwith %}
+
+        {# Thumbnail strip #}
+        {% if images|length > 1 %}
+        <div class="d-flex gap-2 flex-wrap">
+          {% for img in images %}
+          <img src="{{ img.image.url }}"
+               alt="{{ img.alt_text|default:'Photo' }}"
+               onclick="document.getElementById('gallery-main').src='{{ img.image.url }}'"
+               style="width:90px;height:65px;object-fit:cover;border-radius:4px;cursor:pointer;border:2px solid {% if forloop.first %}var(--clr-primary,#0d6efd){% else %}transparent{% endif %};"
+               class="gallery-thumb" />
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% else %}
+        <div style="width:100%;height:400px;background:#e9ecef;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#adb5bd;">
+          <span>{% trans "No images" %}</span>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {# Description #}
+        <div class="mt-4">
+          <h3>{% trans "Description" %}</h3>
+          <div class="property-description">
+            {{ property.description|linebreaks }}
+          </div>
+        </div>
+
+        {# Amenities #}
+        {% if property.amenities.exists %}
+        <div class="mt-4">
+          <h3>{% trans "Amenities" %}</h3>
+          {% regroup property.amenities.all by category as amenity_groups %}
+          {% for group in amenity_groups %}
+          <h6 class="text-muted mt-3">{{ group.grouper.name }}</h6>
+          <div class="d-flex flex-wrap gap-2 mb-2">
+            {% for amenity in group.list %}
+            <span class="badge bg-light text-dark border" style="font-size:.85rem;padding:.45em .75em;">
+              {% if amenity.icon %}<i class="{{ amenity.icon }} me-1"></i>{% endif %}
+              {{ amenity.name }}
+            </span>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+      </div>
+
+      {# ── Info sidebar ───────────────────────────────────── #}
+      <div class="col-lg-4">
+        <div class="card shadow-sm" style="border-radius:var(--radius-md,8px);">
+          <div class="card-body">
+
+            {# Badges #}
+            <div class="mb-3">
+              <span class="badge bg-primary">{{ property.get_property_type_display }}</span>
+              <span class="badge bg-secondary">{{ property.get_listing_type_display }}</span>
+              {% if property.is_featured %}
+              <span class="badge bg-warning text-dark">{% trans "Featured" %}</span>
+              {% endif %}
+            </div>
+
+            {# Pricing #}
+            {% if property.sale_price %}
+            <div class="mb-2">
+              <small class="text-muted">{% trans "Sale Price" %}</small><br>
+              <span class="fw-bold" style="font-size:1.3rem;">{{ property.currency }} {{ property.sale_price|floatformat:"0" }}</span>
+            </div>
+            {% endif %}
+            {% if property.rental_price %}
+            <div class="mb-3">
+              <small class="text-muted">{% trans "Rental Price" %}</small><br>
+              <span class="fw-bold" style="font-size:1.3rem;">{{ property.currency }} {{ property.rental_price|floatformat:"0" }}<small>/{% trans "mo" %}</small></span>
+            </div>
+            {% endif %}
+
+            <hr>
+
+            {# Specs table #}
+            <table class="table table-borderless table-sm mb-0">
+              {% if property.bedrooms is not None %}
+              <tr><td class="text-muted">{% trans "Bedrooms" %}</td><td class="fw-bold text-end">{{ property.bedrooms }}</td></tr>
+              {% endif %}
+              {% if property.bathrooms is not None %}
+              <tr><td class="text-muted">{% trans "Bathrooms" %}</td><td class="fw-bold text-end">{{ property.bathrooms }}</td></tr>
+              {% endif %}
+              <tr><td class="text-muted">{% trans "Parking" %}</td><td class="fw-bold text-end">{{ property.parking_spaces }}</td></tr>
+              {% if property.construction_area %}
+              <tr><td class="text-muted">{% trans "Built Area" %}</td><td class="fw-bold text-end">{{ property.construction_area }} m&sup2;</td></tr>
+              {% endif %}
+              {% if property.lot_area %}
+              <tr><td class="text-muted">{% trans "Lot Area" %}</td><td class="fw-bold text-end">{{ property.lot_area }} m&sup2;</td></tr>
+              {% endif %}
+              {% if property.year_built %}
+              <tr><td class="text-muted">{% trans "Year Built" %}</td><td class="fw-bold text-end">{{ property.year_built }}</td></tr>
+              {% endif %}
+            </table>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% block extra_js %}
+<script>
+/* Gallery thumbnail highlight */
+document.querySelectorAll('.gallery-thumb').forEach(function(thumb) {
+  thumb.addEventListener('click', function() {
+    document.querySelectorAll('.gallery-thumb').forEach(function(t) {
+      t.style.borderColor = 'transparent';
+    });
+    this.style.borderColor = 'var(--clr-primary, #0d6efd)';
+  });
+});
+</script>
+{% endblock %}
+{% endblock %}

@@ -10,6 +10,7 @@ urlpatterns = [
 
 urlpatterns += i18n_patterns(
     path("services/", include("services.urls", namespace="services")),
+    path("properties/", include("properties.urls", namespace="properties")),
     path("", include("cms.urls")),
 )
 

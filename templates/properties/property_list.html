@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Properties" %} | {{ block.super }}{% endblock %}
+
+{% block content %}
+<section id="page-title" class="page-title-center">
+  <div class="container">
+    <div class="page-title">
+      <h1>{% trans "Properties" %}</h1>
+    </div>
+  </div>
+</section>
+
+<section id="page-content">
+  <div class="container">
+
+    {% if properties %}
+    <div class="row">
+      {% for prop in properties %}
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 shadow-sm" style="border-radius:var(--radius-md,8px);overflow:hidden;">
+
+          {# Cover image #}
+          {% with cover=prop.cover_image %}
+          {% if cover and cover.image %}
+          <a href="{% url 'properties:detail' slug=prop.slug %}">
+            <img src="{{ cover.image.url }}"
+                 alt="{{ cover.alt_text|default:prop.title }}"
+                 style="width:100%;height:220px;object-fit:cover;" />
+          </a>
+          {% else %}
+          <div style="width:100%;height:220px;background:#e9ecef;display:flex;align-items:center;justify-content:center;color:#adb5bd;">
+            <span>{% trans "No image" %}</span>
+          </div>
+          {% endif %}
+          {% endwith %}
+
+          <div class="card-body">
+            {# Badges #}
+            <div class="mb-2">
+              <span class="badge bg-primary">{{ prop.get_property_type_display }}</span>
+              <span class="badge bg-secondary">{{ prop.get_listing_type_display }}</span>
+              {% if prop.is_featured %}
+              <span class="badge bg-warning text-dark">{% trans "Featured" %}</span>
+              {% endif %}
+            </div>
+
+            <h5 class="card-title mb-1">
+              <a href="{% url 'properties:detail' slug=prop.slug %}" class="text-dark text-decoration-none">
+                {{ prop.title }}
+              </a>
+            </h5>
+
+            {% if prop.location %}
+            <p class="text-muted small mb-2">{{ prop.location }}</p>
+            {% endif %}
+
+            {# Specs row #}
+            <div class="d-flex gap-3 text-muted small mb-2">
+              {% if prop.bedrooms is not None %}
+              <span title="{% trans 'Bedrooms' %}">{{ prop.bedrooms }} {% trans "bd" %}</span>
+              {% endif %}
+              {% if prop.bathrooms is not None %}
+              <span title="{% trans 'Bathrooms' %}">{{ prop.bathrooms }} {% trans "ba" %}</span>
+              {% endif %}
+              {% if prop.construction_area %}
+              <span title="{% trans 'Area' %}">{{ prop.construction_area }} m&sup2;</span>
+              {% endif %}
+            </div>
+
+            {# Price #}
+            <div class="fw-bold" style="font-size:1.1rem;">
+              {% if prop.sale_price %}
+              {{ prop.currency }} {{ prop.sale_price|floatformat:"0" }}
+              {% endif %}
+              {% if prop.sale_price and prop.rental_price %} / {% endif %}
+              {% if prop.rental_price %}
+              {{ prop.currency }} {{ prop.rental_price|floatformat:"0" }}<small>/{% trans "mo" %}</small>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {# Pagination #}
+    {% if is_paginated %}
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-5">
+      <p class="lead text-muted">{% trans "No properties available at the moment." %}</p>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+{% endblock %}

@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     "treebeard",
     "sekizai",
 
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -57,8 +58,11 @@ INSTALLED_APPS = [
     "djangocms_frontend.contrib.tabs",
     "djangocms_frontend.contrib.utilities",
 
-    # Our custom app
+    # Our custom apps
     "services",
+    "parler",
+    "adminsortable2",
+    "properties",
 
     # Frontend editing extensions (extra CSS classes + row backgrounds)
     "frontend_extensions",
@@ -141,6 +145,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = "en"
 LANGUAGES = [
     ("en", "English"),
+    ("es", "Spanish"),
+    ("fr", "French"),
 ]
 TIME_ZONE = "UTC"
 USE_I18N = True
@@ -184,6 +190,21 @@ THUMBNAIL_PROCESSORS = (
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # ---------------------------------------------------------------------------
+# django-parler  (model-level translations)
+# ---------------------------------------------------------------------------
+PARLER_LANGUAGES = {
+    SITE_ID: (
+        {"code": "en"},
+        {"code": "es"},
+        {"code": "fr"},
+    ),
+    "default": {
+        "fallbacks": ["en"],
+        "hide_untranslated": False,
+    },
+}
+
+# ---------------------------------------------------------------------------
 # djangocms-frontend theme — points to our local extension package which
 # provides form mixins (extra_classes field) and render mixins (bg-* + classes)
 # for every plugin, plus Background support for GridRow.
@@ -192,3 +213,70 @@ DJANGOCMS_FRONTEND_THEME = "frontend_extensions"
 
 # Required for django-cms v4/v5
 CMS_CONFIRM_VERSION4 = True
+
+# ---------------------------------------------------------------------------
+# Django Jazzmin — admin UI theme
+# ---------------------------------------------------------------------------
+JAZZMIN_SETTINGS = {
+    "site_title": "Vertex CMS",
+    "site_header": "Vertex CMS",
+    "site_brand": "Vertex",
+    "welcome_sign": "Welcome to Vertex CMS",
+    "copyright": "Vertex CMS",
+    "search_model": ["auth.User", "properties.Property"],
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "View Site", "url": "/", "new_window": True},
+    ],
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "properties.Property": "fas fa-building",
+        "properties.PropertyImage": "fas fa-images",
+        "properties.Location": "fas fa-map-marker-alt",
+        "properties.Amenity": "fas fa-concierge-bell",
+        "properties.AmenityCategory": "fas fa-tags",
+        "properties.PropertyStatus": "fas fa-flag",
+        "services.Service": "fas fa-briefcase",
+    },
+    "default_icon_parents": "fas fa-folder",
+    "default_icon_children": "fas fa-circle",
+    "related_modal_active": False,
+    "use_google_fonts_cdn": True,
+    "changeform_format": "horizontal_tabs",
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": False,
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": False,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "default",
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success",
+    },
+}

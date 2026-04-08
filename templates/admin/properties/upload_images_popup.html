@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #417690;
+    }
+
+    /* ── Drop zone ───────────────────────────────── */
+    .dropzone {
+      border: 2px dashed #b0bec5;
+      border-radius: 10px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: #fff;
+      margin-bottom: 16px;
+    }
+    .dropzone:hover,
+    .dropzone.drag-over {
+      border-color: #417690;
+      background: #e8f0fe;
+    }
+    .dropzone-icon {
+      font-size: 40px;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .dropzone-text {
+      font-size: 15px;
+      color: #555;
+    }
+    .dropzone-text small {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    /* ── File list / results ─────────────────────── */
+    .upload-list {
+      list-style: none;
+      margin-bottom: 16px;
+    }
+    .upload-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .upload-item img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .upload-item .info {
+      flex: 1;
+      min-width: 0;
+    }
+    .upload-item .name {
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .upload-item .status {
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .status-pending  { color: #888; }
+    .status-uploading { color: #1565c0; }
+    .status-done     { color: #2e7d32; font-weight: 600; }
+    .status-error    { color: #c62828; font-weight: 600; }
+
+    /* ── Progress bar ────────────────────────────── */
+    .progress-bar {
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+    .progress-bar .fill {
+      height: 100%;
+      background: #417690;
+      width: 0%;
+      transition: width .3s;
+    }
+
+    /* ── Summary ─────────────────────────────────── */
+    .summary {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .summary.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      display: block;
+    }
+    .summary.has-errors {
+      background: #fff3e0;
+      color: #e65100;
+      display: block;
+    }
+
+    /* ── Buttons ─────────────────────────────────── */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .btn {
+      display: inline-block;
+      padding: 9px 22px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .btn-primary {
+      background: #417690;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #205067; }
+    .btn-primary:disabled {
+      background: #b0bec5;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+    .btn-secondary:hover { background: #ccc; }
+  </style>
+</head>
+<body>
+
+  <h1>Upload images &mdash; {{ property }}</h1>
+
+  <!-- Drop zone -->
+  <div class="dropzone" id="dropzone">
+    <span class="dropzone-icon">&#128247;</span>
+    <div class="dropzone-text">
+      Drag &amp; drop images here, or <strong>click to browse</strong>
+      <small>JPG, PNG, WebP &mdash; max 10 MB each</small>
+    </div>
+  </div>
+  <input type="file" id="file-input" multiple accept="image/*" style="display:none;">
+
+  <!-- Queued / uploaded files -->
+  <ul class="upload-list" id="upload-list"></ul>
+
+  <!-- Summary (shown after upload) -->
+  <div class="summary" id="summary"></div>
+
+  <!-- Action buttons -->
+  <div class="btn-row">
+    <button class="btn btn-primary" id="btn-upload" disabled>Upload</button>
+    <button class="btn btn-secondary" id="btn-close" style="display:none;">Close &amp; Refresh</button>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  var UPLOAD_URL   = "{{ request.path }}";
+  var CSRF_TOKEN   = "{{ csrf_token }}";
+  var dropzone     = document.getElementById("dropzone");
+  var fileInput    = document.getElementById("file-input");
+  var uploadList   = document.getElementById("upload-list");
+  var summaryEl    = document.getElementById("summary");
+  var btnUpload    = document.getElementById("btn-upload");
+  var btnClose     = document.getElementById("btn-close");
+
+  var queuedFiles  = [];
+
+  // ── Helpers ──────────────────────────────────────────
+  function createPreviewURL(file) {
+    return URL.createObjectURL(file);
+  }
+
+  function renderQueue() {
+    uploadList.innerHTML = "";
+    queuedFiles.forEach(function (entry, idx) {
+      var li = document.createElement("li");
+      li.className = "upload-item";
+      li.id = "upload-item-" + idx;
+
+      var img = document.createElement("img");
+      img.src = entry.previewURL || "";
+      img.alt = entry.file.name;
+
+      var info = document.createElement("div");
+      info.className = "info";
+
+      var name = document.createElement("div");
+      name.className = "name";
+      name.textContent = entry.file.name;
+
+      var status = document.createElement("div");
+      status.className = "status status-pending";
+      status.id = "status-" + idx;
+      status.textContent = formatSize(entry.file.size) + " — Ready";
+
+      var progress = document.createElement("div");
+      progress.className = "progress-bar";
+      progress.id = "progress-" + idx;
+      progress.innerHTML = '<div class="fill"></div>';
+
+      info.appendChild(name);
+      info.appendChild(status);
+      info.appendChild(progress);
+      li.appendChild(img);
+      li.appendChild(info);
+      uploadList.appendChild(li);
+    });
+
+    btnUpload.disabled = queuedFiles.length === 0;
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  }
+
+  function addFiles(fileList) {
+    for (var i = 0; i < fileList.length; i++) {
+      var f = fileList[i];
+      if (!f.type.startsWith("image/")) continue;
+      queuedFiles.push({ file: f, previewURL: createPreviewURL(f) });
+    }
+    renderQueue();
+  }
+
+  function setStatus(idx, text, cls) {
+    var el = document.getElementById("status-" + idx);
+    if (el) {
+      el.textContent = text;
+      el.className = "status " + cls;
+    }
+  }
+
+  function setProgress(idx, pct) {
+    var bar = document.getElementById("progress-" + idx);
+    if (bar) {
+      bar.querySelector(".fill").style.width = pct + "%";
+    }
+  }
+
+  // ── Upload logic ─────────────────────────────────────
+  function uploadAll() {
+    btnUpload.disabled = true;
+    dropzone.style.display = "none";
+
+    var totalFiles = queuedFiles.length;
+    var doneCount  = 0;
+    var successCount = 0;
+    var errorCount   = 0;
+
+    function uploadOne(idx) {
+      if (idx >= totalFiles) {
+        showSummary(successCount, errorCount);
+        return;
+      }
+
+      var entry = queuedFiles[idx];
+      setStatus(idx, "Uploading…", "status-uploading");
+      setProgress(idx, 10);
+
+      var formData = new FormData();
+      formData.append("images", entry.file);
+      formData.append("csrfmiddlewaretoken", CSRF_TOKEN);
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", UPLOAD_URL, true);
+
+      xhr.upload.addEventListener("progress", function (e) {
+        if (e.lengthComputable) {
+          var pct = Math.round((e.loaded / e.total) * 100);
+          setProgress(idx, pct);
+        }
+      });
+
+      xhr.addEventListener("load", function () {
+        doneCount++;
+        if (xhr.status === 200) {
+          try {
+            var resp = JSON.parse(xhr.responseText);
+            if (resp.total_created > 0) {
+              var img = resp.created[0];
+              setStatus(idx, "Uploaded", "status-done");
+              setProgress(idx, 100);
+              // Update thumbnail to server URL
+              var thumb = document.querySelector("#upload-item-" + idx + " img");
+              if (thumb && img.url) thumb.src = img.url;
+              successCount++;
+            } else if (resp.errors && resp.errors.length > 0) {
+              setStatus(idx, resp.errors[0].error, "status-error");
+              errorCount++;
+            }
+          } catch (e) {
+            setStatus(idx, "Server error", "status-error");
+            errorCount++;
+          }
+        } else {
+          setStatus(idx, "HTTP " + xhr.status, "status-error");
+          errorCount++;
+        }
+        // Upload next file
+        uploadOne(idx + 1);
+      });
+
+      xhr.addEventListener("error", function () {
+        doneCount++;
+        errorCount++;
+        setStatus(idx, "Network error", "status-error");
+        uploadOne(idx + 1);
+      });
+
+      xhr.send(formData);
+    }
+
+    // Start sequential upload
+    uploadOne(0);
+  }
+
+  function showSummary(success, errors) {
+    var msg = success + " image(s) uploaded successfully.";
+    if (errors > 0) msg += " " + errors + " failed.";
+    summaryEl.textContent = msg;
+    summaryEl.className = "summary " + (errors > 0 ? "has-errors" : "success");
+    btnClose.style.display = "inline-block";
+  }
+
+  // ── Event listeners ──────────────────────────────────
+
+  // Click dropzone → open file picker
+  dropzone.addEventListener("click", function () {
+    fileInput.click();
+  });
+
+  // File picker change
+  fileInput.addEventListener("change", function () {
+    addFiles(this.files);
+    this.value = "";
+  });
+
+  // Drag & drop
+  dropzone.addEventListener("dragover", function (e) {
+    e.preventDefault();
+    dropzone.classList.add("drag-over");
+  });
+  dropzone.addEventListener("dragleave", function () {
+    dropzone.classList.remove("drag-over");
+  });
+  dropzone.addEventListener("drop", function (e) {
+    e.preventDefault();
+    dropzone.classList.remove("drag-over");
+    addFiles(e.dataTransfer.files);
+  });
+
+  // Upload button
+  btnUpload.addEventListener("click", uploadAll);
+
+  // Close & refresh parent
+  btnClose.addEventListener("click", function () {
+    if (window.opener && !window.opener.closed) {
+      window.opener.location.reload();
+    }
+    window.close();
+  });
+
+})();
+</script>
+</body>
+</html>
