@@ -247,6 +247,7 @@ JAZZMIN_SETTINGS = {
     "related_modal_active": False,
     "use_google_fonts_cdn": True,
     "changeform_format": "horizontal_tabs",
+    "custom_css": "css/cms_popup_fix.css",
 }
 
 JAZZMIN_UI_TWEAKS = {

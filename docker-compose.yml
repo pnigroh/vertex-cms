@@ -1,7 +1,8 @@
 services:
   db:
     image: postgres:15-alpine
-    restart: unless-stopped
+    container_name: vertex-db
+    restart: "no"
     environment:
       POSTGRES_DB: djangocms
       POSTGRES_USER: djangocms
@@ -9,11 +10,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${VERTEX_DB_PORT:-5436}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U djangocms"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   web:
     build: .
-    restart: unless-stopped
+    container_name: vertex-web
+    restart: "no"
     command: >
       sh -c "python manage.py migrate &&
              python manage.py create_superuser_auto &&
@@ -24,9 +31,10 @@ services:
       - media_data:/app/media
       - static_data:/app/static
     ports:
-      - "8000:8000"
+      - "${VERTEX_WEB_PORT:-8300}:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgres://djangocms:djangocms@db:5432/djangocms
       DJANGO_SETTINGS_MODULE: mysite.settings

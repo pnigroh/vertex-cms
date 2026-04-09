@@ -2,25 +2,21 @@
 {% load i18n static %}
 
 {% comment %}
-   Tabbed admin layout for Property change form.
-
-   Tab 1 — "Details": language tabs + all fieldsets (general, classification, specs, …)
-   Tab 2 — "Images":  the PropertyImage sortable inline
-
-   We set change_form_template on PropertyAdmin so this template is loaded
-   directly (bypassing parler's wrapper).  Language tabs are included
-   manually inside the Details tab panel below.
+   Property admin layout:
+   - Two main tabs: "Details" and "Images"
+   - Details tab shows language tabs + all fieldsets as regular sections (no sub-tabs)
+   - Images tab shows the PropertyImage sortable inline
 {% endcomment %}
 
 {% block extrastyle %}
 {{ block.super }}
 <style>
-  /* ── Tab bar ─────────────────────────────────────────── */
+  /* ── Main tab bar ────────────────────────────────────── */
   .prop-tabs {
     display: flex;
     gap: 0;
-    border-bottom: 2px solid #417690;
-    margin: 0 0 16px 0;
+    border-bottom: 2px solid var(--vtx-primary, #417690);
+    margin: 0 0 20px 0;
     padding: 0;
     list-style: none;
   }
@@ -29,7 +25,7 @@
   }
   .prop-tabs a {
     display: block;
-    padding: 10px 24px;
+    padding: 10px 28px;
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
@@ -42,13 +38,16 @@
   }
   .prop-tabs a:hover {
     background: #e8f0fe;
-    color: #417690;
+    color: var(--vtx-primary, #417690);
   }
   .prop-tabs a.active {
     background: #fff;
-    color: #417690;
-    border-color: #417690;
+    color: var(--vtx-primary, #417690);
+    border-color: var(--vtx-primary, #417690);
     border-bottom: 2px solid #fff;
+  }
+  .prop-tabs a .tab-icon {
+    margin-right: 6px;
   }
 
   /* ── Tab panels ──────────────────────────────────────── */
@@ -58,26 +57,56 @@
   .prop-tab-panel.active {
     display: block;
   }
+
+  /* ── Fieldset sections styling ────────────────────────── */
+  .prop-tab-panel fieldset {
+    margin-bottom: 16px;
+    border: 1px solid var(--vtx-border-light, #dee2e6);
+    border-radius: 6px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .prop-tab-panel fieldset h2,
+  .prop-tab-panel fieldset .module > h2 {
+    background: var(--vtx-bg-light, #f8f9fa);
+    color: var(--vtx-text, #212529);
+    padding: 10px 16px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--vtx-border-light, #dee2e6);
+  }
+  .prop-tab-panel fieldset .form-row {
+    padding: 8px 16px;
+  }
 </style>
 {% endblock %}
 
 {% block field_sets %}
 {# ── Tab navigation ─────────────────────────────────────── #}
-<ul class="prop-tabs" id="prop-tabs">
-  <li><a href="#" data-tab="details" class="active">Details</a></li>
-  <li><a href="#" data-tab="images">Images</a></li>
+<ul class="prop-tabs" id="prop-tabs" role="tablist">
+  <li role="presentation">
+    <a href="#" data-tab="details" class="active" role="tab" aria-selected="true" aria-controls="tab-details">
+      <span class="tab-icon" aria-hidden="true">📋</span>Details
+    </a>
+  </li>
+  <li role="presentation">
+    <a href="#" data-tab="images" role="tab" aria-selected="false" aria-controls="tab-images">
+      <span class="tab-icon" aria-hidden="true">🖼️</span>Images
+    </a>
+  </li>
 </ul>
 
-{# ── Details tab panel ──────────────────────────────────── #}
-<div class="prop-tab-panel active" id="tab-details" data-tab-panel="details">
+{# ── Details tab: language tabs + fieldsets as regular sections ── #}
+<div class="prop-tab-panel active" id="tab-details" data-tab-panel="details" role="tabpanel">
   {% if language_tabs %}{% include "admin/parler/language_tabs.html" %}{% endif %}
   {{ block.super }}
 </div>
 {% endblock %}
 
 {% block inline_field_sets %}
-{# ── Images tab panel ───────────────────────────────────── #}
-<div class="prop-tab-panel" id="tab-images" data-tab-panel="images">
+{# ── Images tab: PropertyImage inline ───────────────────── #}
+<div class="prop-tab-panel" id="tab-images" data-tab-panel="images" role="tabpanel">
   {{ block.super }}
 </div>
 {% endblock %}
@@ -91,12 +120,13 @@
 
   function switchTab(tabName) {
     tabs.forEach(function(t) {
-      t.classList.toggle('active', t.getAttribute('data-tab') === tabName);
+      var isActive = t.getAttribute('data-tab') === tabName;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
     panels.forEach(function(p) {
       p.classList.toggle('active', p.getAttribute('data-tab-panel') === tabName);
     });
-    // Remember active tab in sessionStorage
     try { sessionStorage.setItem('prop-active-tab', tabName); } catch(e) {}
   }
 
@@ -113,10 +143,16 @@
     if (saved) switchTab(saved);
   } catch(e) {}
 
-  // If there are errors in the inline (images tab), auto-switch to it
+  // If there are errors in the images tab, auto-switch to it
   var imagesPanel = document.getElementById('tab-images');
   if (imagesPanel && imagesPanel.querySelector('.errorlist')) {
     switchTab('images');
+  }
+
+  // If there are errors in the details tab, auto-switch to it
+  var detailsPanel = document.getElementById('tab-details');
+  if (detailsPanel && detailsPanel.querySelector('.errorlist')) {
+    switchTab('details');
   }
 })();
 </script>

@@ -1,0 +1,1108 @@
+/*
+ * Fix django-jazzmin (AdminLTE 3 / Bootstrap 5) + django-cms 5 + django-filer 3 compatibility.
+ * Addresses: popup layout, button visibility, form alignment, contrast, z-index conflicts.
+ *
+ * Loaded via jazzmin custom_css in settings.py.
+ */
+
+/* ======================================================================
+   CSS CUSTOM PROPERTIES
+   ====================================================================== */
+
+:root {
+    --vtx-primary: #417690;
+    --vtx-primary-hover: #205067;
+    --vtx-blue: #0d6efd;
+    --vtx-blue-hover: #0b5ed7;
+    --vtx-blue-active: #0a58ca;
+    --vtx-green: #198754;
+    --vtx-green-hover: #157347;
+    --vtx-red: #dc3545;
+    --vtx-red-hover: #bb2d3b;
+    --vtx-orange: #fd7e14;
+    --vtx-text: #212529;
+    --vtx-text-muted: #6c757d;
+    --vtx-bg: #fff;
+    --vtx-bg-light: #f8f9fa;
+    --vtx-bg-readonly: #e9ecef;
+    --vtx-border: #ced4da;
+    --vtx-border-light: #dee2e6;
+    --vtx-stripe-odd: #f8f9fa;
+    --vtx-stripe-even: #fff;
+    --vtx-link: #0d6efd;
+    --vtx-link-hover: #0a58ca;
+    --vtx-header-bg: #417690;
+    --vtx-header-text: #fff;
+    --vtx-card-header-bg: #f8f9fa;
+    --vtx-card-header-text: #212529;
+}
+
+
+/* ======================================================================
+   1. POPUP WINDOW FIXES  (body.popup)
+   Hide sidebar, navbar, footer; reset margins; remove AdminLTE backdrops
+   ====================================================================== */
+
+body.popup .app-sidebar,
+body.popup .app-header,
+body.popup .sidebar-overlay,
+body.popup .app-footer,
+body.popup .main-header,
+body.popup .main-sidebar,
+body.popup .main-footer,
+body.popup #jazzy-sidebar,
+body.popup .control-sidebar,
+body.popup .control-sidebar-bg,
+body.popup aside.main-sidebar,
+body.popup nav.main-header {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+}
+
+body.popup .app-main,
+body.popup .content-wrapper,
+body.popup .app-wrapper,
+body.popup .app-main .app-content {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+body.popup .app-main {
+    padding-top: 10px !important;
+}
+
+body.popup .content-wrapper {
+    min-height: auto !important;
+}
+
+/* Remove AdminLTE modal backdrop that greys out popups */
+body.popup .modal-backdrop,
+body.popup .sidebar-overlay {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Popup content sizing */
+body.popup .content,
+body.popup #content {
+    max-width: 100%;
+    padding: 10px 20px;
+}
+
+body.popup form {
+    max-width: 100%;
+}
+
+/* Fix AdminLTE .app-main padding in popups */
+body.popup .app-main > .app-content {
+    padding: 10px 15px !important;
+}
+
+
+/* ======================================================================
+   2. CMS MODAL / TOOLBAR Z-INDEX HIERARCHY
+   ====================================================================== */
+
+.cms-modal-backdrop {
+    z-index: 99999 !important;
+}
+
+.cms-modal,
+.cms-modal-open .cms-modal {
+    z-index: 100000 !important;
+}
+
+.cms-toolbar {
+    z-index: 100001 !important;
+}
+
+.cms-toolbar-expanded .cms-toolbar {
+    z-index: 100001 !important;
+}
+
+/* Select2 must float above CMS modals */
+body.popup .select2-container--open,
+.cms-modal .select2-container--open,
+.select2-container--open {
+    z-index: 100002 !important;
+}
+
+.select2-dropdown {
+    z-index: 100003 !important;
+}
+
+/* Django admin calendar/date widgets */
+.calendarbox,
+.clockbox,
+.calendar-shortcuts,
+.timelist {
+    z-index: 100002 !important;
+}
+
+
+/* ======================================================================
+   3. BUTTON VISIBILITY  (CRITICAL)
+   All submit buttons must have proper contrast and be clearly clickable.
+   ====================================================================== */
+
+/* --- 3a. Generic submit/button baseline --- */
+
+input[type="submit"],
+input[type="button"],
+button[type="submit"],
+button.btn-primary,
+.btn-primary {
+    background-color: var(--vtx-primary) !important;
+    color: #fff !important;
+    border: 1px solid var(--vtx-primary) !important;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+input[type="submit"]:hover,
+input[type="button"]:hover,
+button[type="submit"]:hover,
+button.btn-primary:hover,
+.btn-primary:hover {
+    background-color: var(--vtx-primary-hover) !important;
+    border-color: var(--vtx-primary-hover) !important;
+    color: #fff !important;
+}
+
+input[type="submit"]:focus-visible,
+button[type="submit"]:focus-visible {
+    outline: 2px solid var(--vtx-blue) !important;
+    outline-offset: 2px;
+}
+
+/* --- 3b. Submit row buttons --- */
+
+.submit-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--vtx-bg-light);
+    border-top: 1px solid var(--vtx-border-light);
+}
+
+.submit-row input[type="submit"],
+.submit-row button[type="submit"] {
+    background-color: var(--vtx-primary) !important;
+    color: #fff !important;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--vtx-primary) !important;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.submit-row input[type="submit"]:hover,
+.submit-row button[type="submit"]:hover {
+    background-color: var(--vtx-primary-hover) !important;
+    border-color: var(--vtx-primary-hover) !important;
+}
+
+/* "Save" - primary action (default class) */
+.submit-row .default,
+.submit-row input[name="_save"] {
+    background-color: var(--vtx-primary) !important;
+    color: #fff !important;
+    border-color: var(--vtx-primary) !important;
+}
+
+.submit-row .default:hover,
+.submit-row input[name="_save"]:hover {
+    background-color: var(--vtx-primary-hover) !important;
+}
+
+/* "Save and continue editing" - blue accent */
+.submit-row input[name="_continue"] {
+    background-color: var(--vtx-blue) !important;
+    color: #fff !important;
+    border-color: var(--vtx-blue) !important;
+}
+
+.submit-row input[name="_continue"]:hover {
+    background-color: var(--vtx-blue-hover) !important;
+    border-color: var(--vtx-blue-active) !important;
+}
+
+/* "Save and add another" - green accent */
+.submit-row input[name="_addanother"] {
+    background-color: var(--vtx-green) !important;
+    color: #fff !important;
+    border-color: var(--vtx-green) !important;
+}
+
+.submit-row input[name="_addanother"]:hover {
+    background-color: var(--vtx-green-hover) !important;
+    border-color: var(--vtx-green-hover) !important;
+}
+
+/* --- 3c. Delete buttons / links --- */
+
+.submit-row .deletelink,
+.submit-row a.deletelink,
+.delete-confirmation input[type="submit"],
+a.deletelink,
+button.deletelink,
+.btn-danger,
+button.btn-danger {
+    background-color: var(--vtx-red) !important;
+    color: #fff !important;
+    border: 1px solid var(--vtx-red) !important;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.submit-row .deletelink:hover,
+.submit-row a.deletelink:hover,
+.delete-confirmation input[type="submit"]:hover,
+a.deletelink:hover,
+.btn-danger:hover,
+button.btn-danger:hover {
+    background-color: var(--vtx-red-hover) !important;
+    border-color: var(--vtx-red-hover) !important;
+    color: #fff !important;
+}
+
+/* --- 3d. Filer upload buttons --- */
+
+.filer-dropzone .btn,
+.filer-dropzone button,
+#file-upload-button,
+.js-upload-file-button,
+button.js-upload-file-button,
+.filer-toolbar .btn,
+a.btn.upload-button,
+.upload-button-container .btn,
+.filer-actions .btn,
+.filer-detail .btn,
+#content .filer-actions a.btn,
+.filer-toolbar a.btn {
+    background-color: var(--vtx-blue) !important;
+    color: #fff !important;
+    border: 1px solid var(--vtx-blue) !important;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.filer-dropzone .btn:hover,
+.filer-toolbar .btn:hover,
+.filer-actions .btn:hover,
+.filer-detail .btn:hover,
+.filer-toolbar a.btn:hover {
+    background-color: var(--vtx-blue-hover) !important;
+    border-color: var(--vtx-blue-active) !important;
+    color: #fff !important;
+}
+
+/* Filer cancel / secondary buttons */
+.filer-actions .btn-secondary,
+.filer-toolbar .btn-secondary {
+    background-color: var(--vtx-text-muted) !important;
+    border-color: var(--vtx-text-muted) !important;
+    color: #fff !important;
+}
+
+/* --- 3e. CMS plugin add/edit buttons --- */
+
+.cms-btn,
+.cms-btn-action,
+.cms-btn-primary {
+    background-color: var(--vtx-blue) !important;
+    color: #fff !important;
+    border-radius: 4px;
+    padding: 6px 14px;
+    border: 1px solid var(--vtx-blue) !important;
+    font-weight: 500;
+}
+
+.cms-btn:hover,
+.cms-btn-action:hover,
+.cms-btn-primary:hover {
+    background-color: var(--vtx-blue-hover) !important;
+    border-color: var(--vtx-blue-active) !important;
+}
+
+.cms-btn-danger {
+    background-color: var(--vtx-red) !important;
+    color: #fff !important;
+    border-color: var(--vtx-red) !important;
+}
+
+.cms-btn-danger:hover {
+    background-color: var(--vtx-red-hover) !important;
+}
+
+/* --- 3f. Image widget / file input wrapper buttons --- */
+
+.js-file-input-wrapper .btn,
+.file-input-wrapper .btn,
+input[type="file"] + .btn,
+.image-widget .btn,
+.related-widget-wrapper .btn,
+.filer-file-widget .btn,
+.filer_image_widget .btn {
+    background-color: var(--vtx-blue) !important;
+    color: #fff !important;
+    border: 1px solid var(--vtx-blue) !important;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+}
+
+.js-file-input-wrapper .btn:hover,
+.file-input-wrapper .btn:hover,
+.image-widget .btn:hover,
+.related-widget-wrapper .btn:hover,
+.filer-file-widget .btn:hover,
+.filer_image_widget .btn:hover {
+    background-color: var(--vtx-blue-hover) !important;
+    border-color: var(--vtx-blue-active) !important;
+}
+
+/* --- 3g. "Add another" / inline-add links --- */
+
+.add-row a,
+.djn-add-item a,
+a.add-handler,
+.inline-group .add-row a,
+a.related-widget-wrapper-link,
+a.related-lookup {
+    color: var(--vtx-link) !important;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+.add-row a:hover,
+.djn-add-item a:hover,
+a.add-handler:hover {
+    color: var(--vtx-link-hover) !important;
+}
+
+/* --- 3h. AdminLTE / Bootstrap button overrides --- */
+
+.btn-outline-primary {
+    color: var(--vtx-blue) !important;
+    border-color: var(--vtx-blue) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--vtx-blue) !important;
+    color: #fff !important;
+}
+
+.btn-outline-danger {
+    color: var(--vtx-red) !important;
+    border-color: var(--vtx-red) !important;
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--vtx-red) !important;
+    color: #fff !important;
+}
+
+.btn-outline-success {
+    color: var(--vtx-green) !important;
+    border-color: var(--vtx-green) !important;
+}
+
+.btn-outline-success:hover {
+    background-color: var(--vtx-green) !important;
+    color: #fff !important;
+}
+
+.btn-success {
+    background-color: var(--vtx-green) !important;
+    color: #fff !important;
+    border-color: var(--vtx-green) !important;
+}
+
+.btn-warning {
+    background-color: var(--vtx-orange) !important;
+    color: #fff !important;
+    border-color: var(--vtx-orange) !important;
+}
+
+
+/* ======================================================================
+   4. FORM ALIGNMENT
+   ====================================================================== */
+
+/* Consistent form row spacing */
+.form-row,
+.form-group {
+    margin-bottom: 0.75rem;
+}
+
+/* Fieldset labels: block, bold */
+fieldset .form-row label,
+.form-group > label,
+.form-row > label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+    color: var(--vtx-text);
+}
+
+/* Required field indicator */
+.required label::after,
+label.required::after {
+    content: " *";
+    color: var(--vtx-red);
+    font-weight: 700;
+}
+
+/* Help text: smaller, muted, below input */
+.form-row .helptext,
+.form-row .help,
+.form-group .helptext,
+span.helptext,
+p.help {
+    display: block;
+    font-size: 0.8em;
+    color: var(--vtx-text-muted);
+    margin-top: 0.25rem;
+    line-height: 1.4;
+}
+
+/* Inline forms: proper vertical alignment in tables */
+.inline-group .tabular td,
+.inline-group .tabular th {
+    vertical-align: middle;
+    padding: 6px 8px;
+}
+
+.inline-group .tabular thead th {
+    background-color: var(--vtx-bg-light);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-bottom: 2px solid var(--vtx-border-light);
+}
+
+/* Select widgets */
+select,
+.form-row select,
+.form-group select {
+    padding: 6px 10px;
+    border: 1px solid var(--vtx-border);
+    border-radius: 4px;
+    background-color: var(--vtx-bg);
+    color: var(--vtx-text);
+    max-width: 100%;
+}
+
+select:focus,
+.form-row select:focus {
+    border-color: var(--vtx-blue);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Text inputs */
+input[type="text"],
+input[type="url"],
+input[type="email"],
+input[type="number"],
+input[type="password"],
+textarea,
+.vTextField,
+.vURLField {
+    border: 1px solid var(--vtx-border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    color: var(--vtx-text);
+    background-color: var(--vtx-bg);
+}
+
+input[type="text"]:focus,
+input[type="url"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+    border-color: var(--vtx-blue);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Checkbox alignment */
+input[type="checkbox"] {
+    margin-right: 6px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+}
+
+input[type="checkbox"] + label,
+label input[type="checkbox"] {
+    vertical-align: middle;
+}
+
+/* Radio alignment */
+input[type="radio"] {
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+/* Fieldset styling */
+fieldset {
+    border: 1px solid var(--vtx-border-light);
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    padding: 10px 14px;
+}
+
+fieldset h2,
+fieldset .module caption {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--vtx-text);
+    margin-bottom: 0.5rem;
+}
+
+
+/* ======================================================================
+   5. FILER SPECIFIC
+   ====================================================================== */
+
+/* Dropzone */
+.filer-dropzone,
+.dz-default.dz-message,
+.dropzone {
+    border: 2px dashed var(--vtx-border) !important;
+    background-color: var(--vtx-bg-light) !important;
+    padding: 30px 20px !important;
+    text-align: center;
+    border-radius: 8px;
+    margin: 10px 0;
+    min-height: 120px;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.filer-dropzone.drag-hover,
+.filer-dropzone.dz-drag-hover,
+.dropzone.dz-drag-hover {
+    border-color: var(--vtx-blue) !important;
+    background-color: #e7f1ff !important;
+}
+
+/* File browser table */
+.filer-file-list table,
+#result_list {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.filer-file-list td,
+.filer-file-list th {
+    padding: 8px 10px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--vtx-border-light);
+}
+
+.filer-file-list th {
+    font-weight: 600;
+    background-color: var(--vtx-bg-light);
+}
+
+.filer-file-list tr:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+}
+
+/* Breadcrumbs in filer popup */
+body.popup .filer-breadcrumbs,
+.filer-breadcrumbs {
+    padding: 8px 15px;
+    margin-bottom: 10px;
+    background-color: var(--vtx-bg-light);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.filer-breadcrumbs a {
+    color: var(--vtx-link);
+}
+
+/* Upload progress bars */
+.filer-upload-progress,
+.dz-progress {
+    background-color: var(--vtx-border-light) !important;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 8px;
+}
+
+.filer-upload-progress .bar,
+.dz-upload {
+    background-color: var(--vtx-blue) !important;
+    height: 100%;
+    transition: width 0.3s;
+}
+
+/* Filer thumbnail list */
+.filer-file-list .filer-thumbnail {
+    max-width: 48px;
+    max-height: 48px;
+    border-radius: 4px;
+}
+
+
+/* ======================================================================
+   6. CMS SPECIFIC
+   ====================================================================== */
+
+/* Page tree nodes */
+.cms-pagetree-node,
+.cms-tree-node {
+    padding: 6px 4px;
+    border-bottom: 1px solid var(--vtx-border-light);
+}
+
+.cms-pagetree-node:hover,
+.cms-tree-node:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+}
+
+/* Versioning action buttons: consistent sizing */
+.cms-versioning-action-btn,
+.cms-actions .btn,
+.js-versioning-action {
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* CMS plugin add/edit dialogs */
+.cms-modal .modal-body,
+.cms-modal-dialog .modal-body {
+    padding: 15px 20px;
+}
+
+.cms-modal .modal-footer,
+.cms-modal-dialog .modal-footer {
+    padding: 10px 20px;
+    border-top: 1px solid var(--vtx-border-light);
+}
+
+/* CMS placeholder admin */
+.cms-placeholder-tag {
+    margin: 4px 0;
+}
+
+/* Entangled form fields (djangocms-frontend config JSON) */
+.entangled-widget .form-row {
+    margin-bottom: 0.5rem;
+}
+
+/* djangocms-frontend plugin form layout */
+.djangocms-frontend-admin .form-row {
+    padding: 4px 8px;
+}
+
+/* CMS toolbar stays on top */
+.cms-toolbar-expanded ~ .app-wrapper,
+.cms-toolbar-expanded ~ .content-wrapper {
+    margin-top: 46px;
+}
+
+
+/* ======================================================================
+   7. ADMINLTE / JAZZMIN OVERRIDES
+   ====================================================================== */
+
+/* Fix .content-wrapper margin when sidebar is collapsed or in popup */
+body.popup .content-wrapper,
+body.popup .app-wrapper > .app-main {
+    margin-left: 0 !important;
+}
+
+/* Ensure AdminLTE sidebar overlay doesn't block content */
+.sidebar-overlay,
+.sidebar-mini .sidebar-overlay {
+    z-index: 999;
+}
+
+body.popup .sidebar-overlay {
+    display: none !important;
+}
+
+/* AdminLTE card header contrast */
+.card-header,
+.card-header:first-child {
+    background-color: var(--vtx-card-header-bg);
+    color: var(--vtx-card-header-text);
+    border-bottom: 1px solid var(--vtx-border-light);
+    font-weight: 600;
+}
+
+.card-primary .card-header {
+    background-color: var(--vtx-primary) !important;
+    color: #fff !important;
+}
+
+/* Fix select2 z-index inside CMS modals */
+.cms-modal .select2-container,
+.cms-modal-open .select2-container {
+    z-index: 100002 !important;
+}
+
+.cms-modal .select2-dropdown,
+.cms-modal-open .select2-dropdown {
+    z-index: 100003 !important;
+}
+
+/* Fix AdminLTE info-box and small-box text */
+.info-box .info-box-text,
+.info-box .info-box-number,
+.small-box h3,
+.small-box p {
+    color: var(--vtx-text);
+}
+
+/* Fix sidebar toggle button not needed in popup */
+body.popup [data-widget="pushmenu"],
+body.popup .sidebar-toggle {
+    display: none !important;
+}
+
+
+/* ======================================================================
+   8. GENERAL CONTRAST / READABILITY
+   ====================================================================== */
+
+/* Links clearly blue */
+#content a:not(.btn):not(.deletelink):not(.cms-btn),
+.content a:not(.btn):not(.deletelink):not(.cms-btn),
+.module a:not(.btn) {
+    color: var(--vtx-link);
+}
+
+#content a:not(.btn):not(.deletelink):not(.cms-btn):hover,
+.content a:not(.btn):not(.deletelink):not(.cms-btn):hover {
+    color: var(--vtx-link-hover);
+    text-decoration: underline;
+}
+
+/* Table striping */
+#result_list tbody tr:nth-child(odd),
+.results tbody tr:nth-child(odd) {
+    background-color: var(--vtx-stripe-odd);
+}
+
+#result_list tbody tr:nth-child(even),
+.results tbody tr:nth-child(even) {
+    background-color: var(--vtx-stripe-even);
+}
+
+#result_list tbody tr:hover,
+.results tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.06);
+}
+
+/* Readonly fields */
+.readonly,
+.form-row .readonly,
+div.readonly,
+p.readonly {
+    color: var(--vtx-text);
+    background-color: var(--vtx-bg-readonly);
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--vtx-border-light);
+}
+
+/* Admin changelist headers */
+#result_list th,
+#changelist table thead th,
+.results th {
+    background-color: var(--vtx-header-bg);
+    color: var(--vtx-header-text);
+    padding: 8px 10px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+#result_list th a,
+#changelist table thead th a,
+.results th a {
+    color: var(--vtx-header-text) !important;
+    text-decoration: none;
+}
+
+#result_list th a:hover,
+.results th a:hover {
+    text-decoration: underline;
+}
+
+/* Sorted column indicator */
+#result_list th.sorted,
+.results th.sorted {
+    background-color: var(--vtx-primary-hover);
+}
+
+/* Warning / danger alerts */
+.messagelist .error,
+.messagelist .errornote,
+.errornote {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    padding: 10px 14px;
+    border-radius: 4px;
+}
+
+.messagelist .success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+    padding: 10px 14px;
+    border-radius: 4px;
+}
+
+.messagelist .warning {
+    background-color: #fff3cd;
+    color: #664d03;
+    border: 1px solid #ffecb5;
+    padding: 10px 14px;
+    border-radius: 4px;
+}
+
+.messagelist .info {
+    background-color: #cff4fc;
+    color: #055160;
+    border: 1px solid #b6effb;
+    padding: 10px 14px;
+    border-radius: 4px;
+}
+
+/* Action bar (changelist bulk actions) */
+.actions {
+    padding: 8px 10px;
+    background-color: var(--vtx-bg-light);
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.actions select {
+    padding: 5px 8px;
+    border: 1px solid var(--vtx-border);
+    border-radius: 4px;
+    margin-right: 6px;
+}
+
+.actions button[type="submit"] {
+    font-size: 0.875rem;
+    padding: 6px 14px;
+}
+
+/* Object tools (add / history buttons at top of change form) */
+.object-tools a,
+ul.object-tools a {
+    background-color: var(--vtx-primary) !important;
+    color: #fff !important;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.object-tools a:hover {
+    background-color: var(--vtx-primary-hover) !important;
+}
+
+.object-tools .addlink,
+.object-tools a.addlink {
+    background-color: var(--vtx-green) !important;
+}
+
+.object-tools .addlink:hover {
+    background-color: var(--vtx-green-hover) !important;
+}
+
+/* Pagination links */
+.paginator a,
+.pagination a {
+    color: var(--vtx-link);
+    padding: 4px 8px;
+}
+
+/* Filter sidebar */
+#changelist-filter h2,
+#changelist-filter h3 {
+    font-weight: 600;
+    color: var(--vtx-text);
+    margin-bottom: 0.5rem;
+}
+
+#changelist-filter li.selected a {
+    color: var(--vtx-text);
+    font-weight: 700;
+}
+
+#changelist-filter li a {
+    color: var(--vtx-link);
+}
+
+/* Module / section headers */
+.module h2,
+.module caption,
+.inline-group h2 {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--vtx-text);
+    padding: 8px 12px;
+    background-color: var(--vtx-bg-light);
+    border-bottom: 1px solid var(--vtx-border-light);
+    margin: 0;
+}
+
+
+/* ======================================================================
+   9. DARK MODE AWARENESS
+   ====================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --vtx-text: #e0e0e0;
+        --vtx-text-muted: #adb5bd;
+        --vtx-bg: #1e1e1e;
+        --vtx-bg-light: #2d2d2d;
+        --vtx-bg-readonly: #3a3a3a;
+        --vtx-border: #495057;
+        --vtx-border-light: #3d3d3d;
+        --vtx-stripe-odd: #252525;
+        --vtx-stripe-even: #1e1e1e;
+        --vtx-card-header-bg: #2d2d2d;
+        --vtx-card-header-text: #e0e0e0;
+    }
+
+    /* Dark mode: ensure submit buttons stay highly visible */
+    input[type="submit"],
+    button[type="submit"] {
+        text-shadow: none;
+    }
+
+    /* Dark mode: input fields */
+    input[type="text"],
+    input[type="url"],
+    input[type="email"],
+    input[type="number"],
+    input[type="password"],
+    textarea,
+    select {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #495057;
+    }
+
+    input[type="text"]:focus,
+    input[type="url"]:focus,
+    input[type="email"]:focus,
+    textarea:focus,
+    select:focus {
+        border-color: var(--vtx-blue);
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.35);
+    }
+
+    /* Dark mode: readonly fields */
+    .readonly,
+    .form-row .readonly {
+        background-color: #3a3a3a;
+        color: #e0e0e0;
+        border-color: #495057;
+    }
+
+    /* Dark mode: filer dropzone */
+    .filer-dropzone,
+    .dropzone {
+        background-color: #2d2d2d !important;
+        border-color: #495057 !important;
+    }
+
+    .filer-dropzone.drag-hover,
+    .dropzone.dz-drag-hover {
+        background-color: #1a2c4a !important;
+        border-color: var(--vtx-blue) !important;
+    }
+
+    /* Dark mode: table row hover */
+    #result_list tbody tr:hover,
+    .results tbody tr:hover,
+    .filer-file-list tr:hover {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+
+    /* Dark mode: changelist headers */
+    #result_list th,
+    #changelist table thead th,
+    .results th {
+        background-color: #2c4a5e;
+    }
+
+    /* Dark mode: alerts */
+    .messagelist .error,
+    .errornote {
+        background-color: #3b1f22;
+        color: #f5c2c7;
+        border-color: #5c2b30;
+    }
+
+    .messagelist .success {
+        background-color: #1a3a2a;
+        color: #badbcc;
+        border-color: #2d5f45;
+    }
+
+    .messagelist .warning {
+        background-color: #3d3520;
+        color: #ffecb5;
+        border-color: #5c4f2f;
+    }
+
+    .messagelist .info {
+        background-color: #1a3540;
+        color: #b6effb;
+        border-color: #2d5560;
+    }
+
+    /* Dark mode: module headers */
+    .module h2,
+    .module caption,
+    .inline-group h2 {
+        background-color: #2d2d2d;
+        border-color: #3d3d3d;
+    }
+
+    /* Dark mode: breadcrumbs */
+    .filer-breadcrumbs {
+        background-color: #2d2d2d;
+    }
+
+    /* Dark mode: card */
+    .card-header {
+        background-color: #2d2d2d;
+        color: #e0e0e0;
+        border-color: #3d3d3d;
+    }
+}
