@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "${VERTEX_DB_PORT:-5436}:5432"
+      - "${VERTEX_CMS_DB_PORT:?Mila-bot must inject VERTEX_CMS_DB_PORT}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U djangocms"]
       interval: 5s
@@ -31,7 +31,7 @@ services:
       - media_data:/app/media
       - static_data:/app/static
     ports:
-      - "${VERTEX_WEB_PORT:-8300}:8000"
+      - "${VERTEX_CMS_WEB_PORT:?Mila-bot must inject VERTEX_CMS_WEB_PORT}:8000"
     depends_on:
       db:
         condition: service_healthy
